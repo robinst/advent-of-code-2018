@@ -43,15 +43,21 @@ fn run<R: BufRead>(reader: &mut R) -> (u32, u32) {
         }
     }
 
-    let (best_guard, _) = sums
-        .iter()
-        .max_by_key(|(&_guard, &sum)| sum)
-        .expect("No sums");
-    let (best_minute, _) = minutes[best_guard]
-        .iter()
-        .max_by_key(|(&_minute, &freq)| freq)
-        .expect("No minutes");
-    (*best_guard, *best_minute)
+    let mut best_guard = 0;
+    let mut best_minute = 0;
+    let mut best_freq = 0;
+
+    for (guard, guard_minutes) in minutes {
+        for (minute, freq) in guard_minutes {
+            if freq > best_freq {
+                best_guard = guard;
+                best_minute = minute;
+                best_freq = freq;
+            }
+        }
+    }
+
+    (best_guard, best_minute)
 }
 
 fn main() {
@@ -95,7 +101,7 @@ mod tests {
 
         let mut reader = Cursor::new(input);
         let (id, minutes) = run(&mut reader);
-        assert_eq!(id, 10);
-        assert_eq!(minutes, 24);
+        assert_eq!(id, 99);
+        assert_eq!(minutes, 45);
     }
 }
