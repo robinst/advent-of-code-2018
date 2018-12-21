@@ -10,26 +10,19 @@ struct Claim {
     h: u32,
 }
 
-// format: #1 @ 817,273: 26x26
-//              ^   ^    ^  ^
-//              x   y    w  h
+// format: #1 @ 817,273: 26x27
+//          ^   ^   ^    ^  ^
+//          id  x   y    w  h
 fn parse(line: &str) -> Option<Claim> {
-    let at = line.find(" @ ")?;
-    let after_at = &line[at + 3..];
+    let mut numbers = line
+        .split(|c: char| !c.is_numeric())
+        .filter(|s| !s.is_empty());
 
-    let id = line[1..at].parse().ok()?;
-
-    let comma = after_at.find(',')?;
-    let colon = after_at.find(": ")?;
-
-    let x: u32 = after_at[..comma].parse().ok()?;
-    let y: u32 = after_at[comma + 1..colon].parse().ok()?;
-
-    let after_colon = &after_at[colon + 2..];
-    let cross = after_colon.find('x')?;
-    let w: u32 = after_colon[..cross].parse().ok()?;
-    let h: u32 = after_colon[cross + 1..].parse().ok()?;
-
+    let id = numbers.next()?.parse().ok()?;
+    let x = numbers.next()?.parse().ok()?;
+    let y = numbers.next()?.parse().ok()?;
+    let w = numbers.next()?.parse().ok()?;
+    let h = numbers.next()?.parse().ok()?;
     Some(Claim { id, x, y, w, h })
 }
 
@@ -61,4 +54,21 @@ fn main() {
     }
 
     println!("Remaining candidates: {:?}", candidates);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse() {
+        let result = parse("#1 @ 817,273: 26x27");
+        let Claim { id, x, y, w, h } = result.unwrap();
+
+        assert_eq!(id, 1);
+        assert_eq!(x, 817);
+        assert_eq!(y, 273);
+        assert_eq!(w, 26);
+        assert_eq!(h, 27);
+    }
 }
